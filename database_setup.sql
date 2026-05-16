@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS momo-data-processor;
+CREATE DATABASE IF NOT EXISTS momo_data_processor;
 
-USE momo-data-processor;
+USE momo_data_processor;
 
---Escape to be able to run the file multiple times without having to update the tables
+-- Escape to be able to run the file multiple times without having to update the tables
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS user_permissions;
 DROP TABLE IF EXISTS system_logs;
@@ -11,23 +11,23 @@ DROP TABLE IF EXISTS transaction_categories;
 DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
 
---CREATE TABLES
---Users table with the cardinality of 1:M with the transactions
+-- --CREATE TABLES
+-- --Users table with the cardinality of 1:M with the transactions
 CREATE TABLE users(
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     phone_number VARCHAR(15) UNIQUE NOT NULL,
     account_balance DECIMAL(15, 2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    COMMENT 'Stores the sender and receiver information'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     COMMENT 'Stores the sender and receiver information.'
 );
 
---Table to show the available categories of transactions
+-- --Table to show the available categories of transactions
 CREATE TABLE transaction_categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(50) NOT NULL UNIQUE,
-    description TEXT,
-    COMMENT 'Types of transactions: Deposit, Withdrawal, Airtime, etc.'
+    description TEXT
+--     COMMENT 'Types of transactions: Deposit, Withdrawal, Airtime, etc.'
 );
 
 CREATE TABLE user_permissions(
@@ -40,24 +40,28 @@ CREATE TABLE user_permissions(
     FOREIGN KEY (category_id) REFERENCES transaction_categories(category_id) ON DELETE CASCADE
 );
 
---Transaction table which store the transactions with unique transaction IDS
+-- --Transaction table which store the transactions with unique transaction IDS
 CREATE TABLE transactions(
     transaction_id VARCHAR(50) PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT,
-    category_id INT NOT NULL, --This is the type of transaction eg payment types
+--  --This is the type of transaction eg payment types
+    category_id INT NOT NULL,
     amount DECIMAL(15, 2) DEFAULT 0.00,
-    fee_charged DECIMAL(15, 2) DEFAULT 0.00, --fee charged for the transaction
+--     --fee charged for the transaction
+    fee_charged DECIMAL(15, 2) DEFAULT 0.00, 
     transaction_time DATETIME NOT NULL,
-    raw_sms_body TEXT, --This is going to be the original text message body
+--     --This is going to be the original text message body
+    raw_sms_body TEXT, 
 
---constrains
+-- --constrains
     CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES users(user_id),
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(user_id),
     CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES transaction_categories(category_id),
-    CONSTRAINT chk_positive_amount CHECK (amount > 0) --Check whether the amount sent is greater than 0
+--     --Check whether the amount sent is greater than 0
+    CONSTRAINT chk_positive_amount CHECK (amount > 0) 
 );
---Logging table for all the transactions or storing the transaction histories for all the users
+-- --Logging table for all the transactions or storing the transaction histories for all the users
 CREATE TABLE system_logs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     transaction_id VARCHAR(50),
@@ -66,6 +70,7 @@ CREATE TABLE system_logs (
     status_code INT,
     FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
+
 
 
 --Inserting into transactions categories
